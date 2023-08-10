@@ -6,29 +6,15 @@ Vue.use(Router);
 const routes = [
   {
     path: '*',
-    redirect: '/goods'
+    redirect: '/main'
   },
   {
-    name: 'user',
-    component: () => import('./view/user'),
+    name: 'main',
+    component: () => import('./view/main'),
     meta: {
-      title: '会员中心'
+      title: '仙桃数据谷'
     }
   },
-  {
-    name: 'cart',
-    component: () => import('./view/cart'),
-    meta: {
-      title: '购物车'
-    }
-  },
-  {
-    name: 'goods',
-    component: () => import('./view/goods'),
-    meta: {
-      title: '商品详情'
-    }
-  }
 ];
 
 // add route path

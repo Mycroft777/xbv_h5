@@ -17,7 +17,7 @@
         <p class="subTitle">3，自动驾驶末端配送车</p>
       </div>
       <van-divider content-position="left" :style="{ color: '#1989fa', borderColor: '#1989fa', padding: '0',margin:'10px 0 0' }">
-        <p class="title" style="margin: 0">乘坐申请体验</p>
+        <p class="title" style="margin: 0">用户体验评价</p>
       </van-divider>
       <div class="form">
         <van-form @submit="onSubmit" :colon="true" :show-error="false">

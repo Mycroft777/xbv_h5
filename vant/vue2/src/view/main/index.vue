@@ -5,7 +5,12 @@
         <div class="item" v-for="(item, index) in stationList" :key="item.routeSideName">
           <div class="item-car">
             <img
-                v-if="currentIndex === index"
+                v-if="currentIndexList.includes(index)"
+                :src="getCarIcon()"
+                alt=""
+            />
+            <img
+                v-if="!currentIndexList.length && index === 0"
                 :src="getCarIcon()"
                 alt=""
             />
@@ -13,7 +18,7 @@
           <div class="item-top">
             <img
               class="item-img"
-              v-if="[0, currentIndex, stationList.length - 1].includes(index)"
+              v-if="[0, ...currentIndexList, stationList.length - 1].includes(index)"
               :src="getSrc(index)"
             />
             <div class="item-point" v-else></div>
@@ -104,6 +109,7 @@
 
 <script>
 import {saveRiding, queryCar, queryStationList} from "@/api/station.js";
+// import {saveRiding} from "@/api/station.js";
 import QRCode from "qrcodejs2";
 import nextIcon from "@/assets/img/next.png";
 import endIcon from "@/assets/img/end.png";
@@ -126,9 +132,20 @@ export default {
       pattern: /^1[3-9]\d{9}$/,
       showPickerUp: false,
       showPickerDown: false,
+      // stationList: [
+      //   { id: 1, nstaName: '', routeSideName: '会议中心站', lineName: '' },
+      //   { id: 2, nstaName: '', routeSideName: '邮电学院站', lineName: '' },
+      //   { id: 3, nstaName: '', routeSideName: '体验中心站', lineName: '' },
+      //   { id: 4, nstaName: '', routeSideName: '体育中心站', lineName: '' },
+      //   { id: 5, nstaName: '', routeSideName: '龙湖冠寓站', lineName: '' },
+      //   { id: 6, nstaName: '', routeSideName: '假日酒店站', lineName: '' },
+      //   { id: 7, nstaName: '', routeSideName: '长安软件园站', lineName: '' },
+      //   { id: 8, nstaName: '', routeSideName: '指环王站', lineName: '' },
+      // ],
       stationList: [],
       stationPickerList: [],
-      currentIndex: 0,
+      currentIndexList: [],
+      carData: [],
       showDialog: false,
       timer: null,
       hasCar: false
@@ -142,19 +159,25 @@ export default {
   },
   methods: {
     async getCarPosition() {
-      const carData = (await queryCar()).data
-      if(carData.length){
-        const carText = carData[0].cstaName
-        this.form.carId = carData[0].carId
-        this.form.lineName = carData[0].lineName
-        this.currentIndex = this.stationPickerList.indexOf(carText)
+      // this.carData = [
+      //   { carId: 3, nstaName: '', cstaName: '体验中心站', lineName: '33' },
+      //   { carId: 8, nstaName: '', cstaName: '指环王站', lineName: '88' },
+      // ]
+      this.carData = (await queryCar()).data
+      if(this.carData.length){
+        const carText = []
+        this.currentIndexList = []
+        this.carData.forEach(item=>{
+          carText.push(item.cstaName)
+          this.currentIndexList.push(this.stationPickerList.indexOf(item.cstaName))
+        })
         this.hasCar = true
       }else{
         this.hasCar = false
       }
     },
     getSrc(index) {
-      if (index === this.currentIndex) return nextIcon;
+      if (this.currentIndexList.includes(index)) return nextIcon;
       if (index === 0) return startIcon;
       else if (index === this.stationList.length - 1) return endIcon;
     },
@@ -177,6 +200,14 @@ export default {
       this.showDialog = false;
     },
     async onSubmit() {
+      this.form.carId = ''
+      this.form.lineName = ''
+      this.carData.forEach(item =>{
+        if(item.cstaName === this.form.startStation){
+          this.form.carId = item.carId
+          this.form.lineName = item.lineName
+        }
+      })
       const { data } = await saveRiding(this.form);
       this.showDialog = true;
       this.$nextTick(() => {

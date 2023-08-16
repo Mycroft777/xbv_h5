@@ -12,9 +12,9 @@ export function saveRiding(params) {
     });
 }
 // 获取站点信息
-export function queryStation() {
+export function queryStationList() {
     return api({
-        url: `/queryStation`,
+        url: `/mileAndStation`,
         headers: {
             isToken: false,
         },

@@ -1,11 +1,12 @@
 <template>
   <div>
+    <div class="head">仙桃数据谷</div>
     <div class="station">
-        <div class="item" v-for="(item, index) in stationList" :key="item.cstaName">
+        <div class="item" v-for="(item, index) in stationList" :key="item.routeSideName">
           <div class="item-car">
             <img
                 v-if="currentIndex === index"
-                src="../../assets/img/car.png"
+                :src="getCarIcon()"
                 alt=""
             />
           </div>
@@ -17,7 +18,7 @@
             />
             <div class="item-point" v-else></div>
           </div>
-          <span class="item-title">{{ item.cstaName }}</span>
+          <span class="item-title">{{ item.routeSideName }}</span>
         </div>
         <div class="no-data" v-if="!stationList.length">暂无站点数据</div>
     </div>
@@ -80,7 +81,7 @@
           />
         </van-popup>
         <div class="station-btn">
-          <van-button round block type="primary" native-type="submit"
+          <van-button round block type="primary" native-type="submit" :disabled="!hasCar"
             >亮码乘车</van-button
           >
         </div>
@@ -102,11 +103,14 @@
 </template>
 
 <script>
-import { saveRiding } from "@/api/station.js";
+import {saveRiding, queryCar, queryStationList} from "@/api/station.js";
 import QRCode from "qrcodejs2";
 import nextIcon from "@/assets/img/next.png";
 import endIcon from "@/assets/img/end.png";
 import startIcon from "@/assets/img/start.png";
+import carIcon from "@/assets/img/car.png";
+import carGrayIcon from "@/assets/img/car_gray.png";
+
 export default {
   data() {
     return {
@@ -116,46 +120,49 @@ export default {
         ridingNum: 1,
         startStation: "",
         endStation: "",
-        carId:1, //TODO:暂时写死
-        lineName:'test'//TODO:暂时写死
+        carId:1,
+        lineName:'test'
       },
       pattern: /^1[3-9]\d{9}$/,
       showPickerUp: false,
       showPickerDown: false,
-      stationList: [
-        {carId:1,nstaName:'',cstaName:'会议中心站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'邮电学院站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'体验中心站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'体育中心站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'龙湖冠寓站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'假日酒店站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'长安软件园站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'指环王站',lineName:''},
-        {carId:1,nstaName:'',cstaName:'指环王站',lineName:''},
-      ],
+      stationList: [],
       stationPickerList: [],
       currentIndex: 0,
       showDialog: false,
       timer: null,
+      hasCar: false
     };
   },
   async created() {
-    // this.stationList = await queryStation()
-    this.stationPickerList = this.stationList.map(item=>item.cstaName)
-    // this.getCarPosition()
-    this.timer = setInterval(this.getCarPosition, 2 * 1000)
+    this.stationList = (await queryStationList()).data.routeSiteInfo
+    this.stationPickerList = this.stationList.map(item=>item.routeSideName)
+    await this.getCarPosition()
+    this.timer = setInterval(this.getCarPosition, 20 * 1000)
   },
   methods: {
     async getCarPosition() {
-      const carText = '邮电学院站'
-      this.currentIndex = this.stationPickerList.indexOf(carText)
-      // this.currentIndex = (this.currentIndex + 1) % this.stationList.length;
-      // getInfo1()
+      const carData = (await queryCar()).data
+      if(carData.length){
+        const carText = carData[0].cstaName
+        this.form.carId = carData[0].carId
+        this.form.lineName = carData[0].lineName
+        this.currentIndex = this.stationPickerList.indexOf(carText)
+        this.hasCar = true
+      }else{
+        this.hasCar = false
+      }
     },
     getSrc(index) {
       if (index === this.currentIndex) return nextIcon;
       if (index === 0) return startIcon;
       else if (index === this.stationList.length - 1) return endIcon;
+    },
+    getCarIcon(){
+      if(this.hasCar)
+        return carIcon
+      else
+        return carGrayIcon
     },
     onConfirmUp(value) {
       this.form.startStation = value;
@@ -170,7 +177,7 @@ export default {
       this.showDialog = false;
     },
     async onSubmit() {
-      const {  data } = await saveRiding(this.form);
+      const { data } = await saveRiding(this.form);
       this.showDialog = true;
       this.$nextTick(() => {
         let qrcode = new QRCode(document.getElementById("canvasQrcode"), {
@@ -189,6 +196,17 @@ export default {
 </script>
 
 <style scoped lang="less">
+.head {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 700;
+  background-color: #f0f0f0;
+  margin-bottom: 10px;
+}
 .station {
   width: 356px;
   height: 173px;
@@ -211,7 +229,7 @@ export default {
       img {
         width: 100%;
         height: 100%;
-        transform: translate(-10%,0)
+        transform: translate(-5%,0)
       }
     }
     .item-top {

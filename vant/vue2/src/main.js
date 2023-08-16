@@ -9,8 +9,11 @@ import { Button } from 'vant';
 import { Picker } from 'vant';
 import {Popup} from 'vant';
 import { Stepper } from 'vant';
+import { Rate } from 'vant'
+import { Divider } from 'vant'
 import { Dialog } from 'vant';
 import { Notify } from 'vant';
+
 Vue.use(Notify);
 Vue.use(Picker);
 Vue.use(Button);
@@ -19,6 +22,8 @@ Vue.use(Field);
 Vue.use(Popup);
 Vue.use(Dialog);
 Vue.use(Stepper);
+Vue.use(Rate)
+Vue.use(Divider)
 new Vue({
   store,
   router,

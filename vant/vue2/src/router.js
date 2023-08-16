@@ -5,7 +5,7 @@ Vue.use(Router);
 
 const routes = [
   {
-    path: '*',
+    path: '/',
     redirect: '/main'
   },
   {
@@ -13,6 +13,13 @@ const routes = [
     component: () => import('./view/main'),
     meta: {
       title: '仙桃数据谷'
+    }
+  },
+  {
+    name: 'evaluate',
+    component: () => import('./view/evaluate'),
+    meta: {
+      title: '仙桃智驾体验评价'
     }
   },
 ];

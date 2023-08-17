@@ -218,10 +218,10 @@ export default {
         qrcode.makeCode(data.ridingCode);
       });
     },
-    beforeDestroy() {
-      clearInterval(this.timer);
-      this.timer = null;
-    },
+  },
+  beforeDestroy() {
+    clearInterval(this.timer);
+    this.timer = null;
   },
 };
 </script>

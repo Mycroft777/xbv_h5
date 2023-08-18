@@ -6,12 +6,7 @@
           <div class="item-car">
             <img
                 v-if="currentIndexList.includes(index)"
-                :src="getCarIcon()"
-                alt=""
-            />
-            <img
-                v-if="!currentIndexList.length && index === 0"
-                :src="getCarIcon()"
+                src="@/assets/img/car.png"
                 alt=""
             />
           </div>
@@ -114,8 +109,6 @@ import QRCode from "qrcodejs2";
 import nextIcon from "@/assets/img/next.png";
 import endIcon from "@/assets/img/end.png";
 import startIcon from "@/assets/img/start.png";
-import carIcon from "@/assets/img/car.png";
-import carGrayIcon from "@/assets/img/car_gray.png";
 
 export default {
   data() {
@@ -164,9 +157,9 @@ export default {
       //   { carId: 8, nstaName: '', cstaName: '指环王站', lineName: '88' },
       // ]
       this.carData = (await queryCar()).data
+      this.currentIndexList = []
       if(this.carData.length){
         const carText = []
-        this.currentIndexList = []
         this.carData.forEach(item=>{
           carText.push(item.cstaName)
           this.currentIndexList.push(this.stationPickerList.indexOf(item.cstaName))
@@ -180,12 +173,6 @@ export default {
       if (this.currentIndexList.includes(index)) return nextIcon;
       if (index === 0) return startIcon;
       else if (index === this.stationList.length - 1) return endIcon;
-    },
-    getCarIcon(){
-      if(this.hasCar)
-        return carIcon
-      else
-        return carGrayIcon
     },
     onConfirmUp(value) {
       this.form.startStation = value;

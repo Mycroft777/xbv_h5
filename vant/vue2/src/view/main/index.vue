@@ -81,7 +81,7 @@
           />
         </van-popup>
         <div class="station-btn">
-          <van-button round block type="primary" native-type="submit" :disabled="!hasCar"
+          <van-button round block type="primary" native-type="submit" :disabled="!carData.length"
             >亮码乘车</van-button
           >
         </div>
@@ -109,6 +109,7 @@ import QRCode from "qrcodejs2";
 import nextIcon from "@/assets/img/next.png";
 import endIcon from "@/assets/img/end.png";
 import startIcon from "@/assets/img/start.png";
+import {Notify} from "vant";
 
 export default {
   data() {
@@ -141,14 +142,13 @@ export default {
       carData: [],
       showDialog: false,
       timer: null,
-      hasCar: false
     };
   },
   async created() {
     this.stationList = (await queryStationList()).data.routeSiteInfo
     this.stationPickerList = this.stationList.map(item=>item.routeSideName)
     await this.getCarPosition()
-    this.timer = setInterval(this.getCarPosition, 20 * 1000)
+    this.timer = setInterval(this.getCarPosition, 15 * 1000)
   },
   methods: {
     async getCarPosition() {
@@ -164,9 +164,6 @@ export default {
           carText.push(item.cstaName)
           this.currentIndexList.push(this.stationPickerList.indexOf(item.cstaName))
         })
-        this.hasCar = true
-      }else{
-        this.hasCar = false
       }
     },
     getSrc(index) {
@@ -195,6 +192,10 @@ export default {
           this.form.lineName = item.lineName
         }
       })
+      if(this.form.carId === ''){
+        Notify({ type: 'warning', message: '当前尚无车辆在上车点！' });
+        return
+      }
       const { data } = await saveRiding(this.form);
       this.showDialog = true;
       this.$nextTick(() => {
